@@ -1,132 +1,96 @@
 import { useAppSelector } from "@/hooks/useRedux";
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, LineChart, Line, Legend
-} from "recharts";
-import { Users, BookOpen, DollarSign, TrendingUp } from "lucide-react";
-
-const COLORS = ["hsl(45, 88%, 62%)", "hsl(142, 72%, 40%)", "hsl(210, 92%, 55%)", "hsl(0, 84%, 60%)", "hsl(280, 70%, 50%)"];
+  TrendingUp, Users, DollarSign, BookOpen,
+  ArrowUpRight, ArrowDownRight, Activity, Zap
+} from "lucide-react";
 
 const AdminAnalytics = () => {
   const courses = useAppSelector((s) => s.courses.courses);
-  const trainers = useAppSelector((s) => s.courses.trainers);
+  const users = useAppSelector((s) => s.users.users);
 
-  // Enrollment by course
-  const enrollmentData = courses.map((c) => ({
-    name: c.title.slice(0, 18),
-    enrolled: c.enrolled,
-  }));
+  const totalEnrollments = courses.reduce((acc, c) => acc + c.enrolled, 0);
+  const totalRevenue = courses.reduce((acc, c) => acc + (c.price * c.enrolled), 0);
+  const avgRating = (courses.reduce((acc, c) => acc + (c.rating || 0), 0) / courses.length).toFixed(1);
 
-  // Revenue by course
-  const revenueData = courses.map((c) => ({
-    name: c.title.slice(0, 18),
-    revenue: Math.round((c.price * c.enrolled) / 1000),
-  }));
-
-  // Category distribution
-  const categoryMap: Record<string, number> = {};
-  courses.forEach((c) => {
-    categoryMap[c.category] = (categoryMap[c.category] || 0) + c.enrolled;
-  });
-  const categoryData = Object.entries(categoryMap).map(([name, value]) => ({ name, value }));
-
-  // Monthly revenue trend (mock)
-  const monthlyTrend = [
-    { month: "Sep", revenue: 280 },
-    { month: "Oct", revenue: 350 },
-    { month: "Nov", revenue: 420 },
-    { month: "Dec", revenue: 510 },
-    { month: "Jan", revenue: 620 },
-    { month: "Feb", revenue: 730 },
+  const stats = [
+    { label: "Total Revenue", value: `₹${(totalRevenue / 100000).toFixed(1)}L`, trend: "+12.5%", icon: DollarSign, color: "text-accent" },
+    { label: "Total Users", value: users.length, trend: "+8.2%", icon: Users, color: "text-info" },
+    { label: "Total Enrollments", value: totalEnrollments, trend: "+15.3%", icon: TrendingUp, color: "text-success" },
+    { label: "Avg. Rating", value: avgRating, trend: "+0.2", icon: Zap, color: "text-warning" },
   ];
-
-  // Completion rates
-  const completionData = courses.map((c) => ({
-    name: c.title.slice(0, 18),
-    rate: Math.round(40 + Math.random() * 55),
-  }));
-
-  const totalStudents = courses.reduce((s, c) => s + c.enrolled, 0);
-  const totalRevenue = courses.reduce((s, c) => s + c.price * c.enrolled, 0);
 
   return (
     <div className="space-y-6 animate-fade-in-up">
-      <h2 className="font-display text-2xl font-bold text-foreground">Platform Analytics 📊</h2>
+      <div>
+        <h2 className="font-display text-2xl font-bold text-foreground">System Analytics</h2>
+        <p className="text-muted-foreground text-sm">Deep dive into platform performance metrics</p>
+      </div>
 
-      {/* Summary stats */}
+      {/* KPI Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {[
-          { label: "Total Students", value: totalStudents.toLocaleString(), icon: Users, color: "text-info" },
-          { label: "Active Courses", value: courses.length, icon: BookOpen, color: "text-success" },
-          { label: "Total Revenue", value: `₹${(totalRevenue / 100000).toFixed(1)}L`, icon: DollarSign, color: "text-accent" },
-          { label: "Avg Completion", value: `${Math.round(completionData.reduce((s, c) => s + c.rate, 0) / completionData.length)}%`, icon: TrendingUp, color: "text-warning" },
-        ].map((stat) => (
+        {stats.map((stat) => (
           <div key={stat.label} className="rounded-xl border bg-card p-5 shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">{stat.label}</span>
-              <stat.icon className={`h-5 w-5 ${stat.color}`} />
+              <div className={`p-2 rounded-lg bg-muted/50 ${stat.color}`}>
+                <stat.icon className="h-5 w-5" />
+              </div>
+              <span className={`text-xs font-medium flex items-center ${stat.trend.startsWith('+') ? 'text-success' : 'text-destructive'}`}>
+                {stat.trend} {stat.trend.startsWith('+') ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+              </span>
             </div>
-            <p className="mt-2 font-display text-2xl font-bold text-card-foreground">{stat.value}</p>
+            <div className="mt-4">
+              <p className="text-sm text-muted-foreground">{stat.label}</p>
+              <p className="text-2xl font-bold text-card-foreground">{stat.value}</p>
+            </div>
           </div>
         ))}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Enrollment Chart */}
-        <div className="rounded-xl border bg-card p-5 shadow-sm">
-          <h3 className="font-display font-bold text-card-foreground mb-4">Enrollment by Course</h3>
-          <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={enrollmentData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(214, 20%, 88%)" />
-              <XAxis dataKey="name" tick={{ fontSize: 10 }} angle={-20} textAnchor="end" height={50} />
-              <YAxis tick={{ fontSize: 11 }} />
-              <Tooltip />
-              <Bar dataKey="enrolled" fill="hsl(45, 88%, 62%)" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+      {/* Popular Courses & Growth Chart Simulation */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2 rounded-xl border bg-card shadow-sm p-6 overflow-hidden">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="font-display font-bold text-foreground flex items-center gap-2">
+              <Activity className="h-5 w-5 text-accent" /> Revenue Growth
+            </h3>
+            <select className="bg-muted text-xs font-semibold rounded-md px-2 py-1 outline-none">
+              <option>Last 6 Months</option>
+              <option>Last Year</option>
+            </select>
+          </div>
+          <div className="h-64 flex items-end gap-2 px-2">
+            {[45, 62, 58, 75, 90, 82].map((height, i) => (
+              <div key={i} className="flex-1 flex flex-col items-center gap-2 group">
+                <div className="w-full bg-accent/20 rounded-t-md relative overflow-hidden transition-all duration-500 hover:bg-accent/40" style={{ height: `${height}%` }}>
+                  <div className="absolute inset-0 bg-accent/30 animate-pulse" />
+                </div>
+                <span className="text-[10px] text-muted-foreground font-medium">Month {i + 1}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Revenue Trend */}
-        <div className="rounded-xl border bg-card p-5 shadow-sm">
-          <h3 className="font-display font-bold text-card-foreground mb-4">Monthly Revenue Trend (₹K)</h3>
-          <ResponsiveContainer width="100%" height={260}>
-            <LineChart data={monthlyTrend}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(214, 20%, 88%)" />
-              <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 11 }} />
-              <Tooltip />
-              <Line type="monotone" dataKey="revenue" stroke="hsl(142, 72%, 40%)" strokeWidth={2} dot={{ fill: "hsl(142, 72%, 40%)" }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Category Distribution */}
-        <div className="rounded-xl border bg-card p-5 shadow-sm">
-          <h3 className="font-display font-bold text-card-foreground mb-4">Students by Category</h3>
-          <ResponsiveContainer width="100%" height={260}>
-            <PieChart>
-              <Pie data={categoryData} cx="50%" cy="50%" outerRadius={100} paddingAngle={3} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
-                {categoryData.map((_, i) => (
-                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Completion Rates */}
-        <div className="rounded-xl border bg-card p-5 shadow-sm">
-          <h3 className="font-display font-bold text-card-foreground mb-4">Completion Rates</h3>
-          <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={completionData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(214, 20%, 88%)" />
-              <XAxis dataKey="name" tick={{ fontSize: 10 }} angle={-20} textAnchor="end" height={50} />
-              <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} />
-              <Tooltip />
-              <Bar dataKey="rate" fill="hsl(210, 92%, 55%)" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+        <div className="rounded-xl border bg-card shadow-sm p-6">
+          <h3 className="font-display font-bold text-foreground mb-4 flex items-center gap-2">
+            <BookOpen className="h-5 w-5 text-info" /> Top Courses
+          </h3>
+          <div className="space-y-4">
+            {courses.sort((a, b) => b.enrolled - a.enrolled).slice(0, 5).map((course, idx) => (
+              <div key={course.id} className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-bold text-muted-foreground w-4">{idx + 1}.</span>
+                  <div className="max-w-[120px]">
+                    <p className="text-xs font-semibold text-foreground truncate">{course.title}</p>
+                    <p className="text-[10px] text-muted-foreground">{course.category}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs font-bold text-accent">{course.enrolled}</p>
+                  <p className="text-[10px] text-muted-foreground">students</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

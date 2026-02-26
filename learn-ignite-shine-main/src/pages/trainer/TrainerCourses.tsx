@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "@/hooks/useRedux";
 import { addCourse } from "@/store/slices/coursesSlice";
 import { toggleQuizEnabled } from "@/store/slices/quizSlice";
@@ -15,6 +16,7 @@ import {
 const categories = ["AI & ML", "Cloud Computing", "DevOps", "Data Science", "React Development", "Cyber Security", "Other"];
 
 const TrainerCourses = () => {
+  const navigate = useNavigate();
   const courses = useAppSelector((s) => s.courses.courses);
   const trainers = useAppSelector((s) => s.courses.trainers);
   const quizEnabled = useAppSelector((s) => s.quiz.quizEnabled);
@@ -149,28 +151,17 @@ const TrainerCourses = () => {
                 <span>₹{course.price}</span>
               </div>
 
-              {/* Quiz toggle */}
-              <div className="flex items-center justify-between pt-2 border-t border-border">
-                <span className="text-sm text-muted-foreground flex items-center gap-1">
-                  <Settings className="h-3.5 w-3.5" /> Quiz
-                </span>
-                <button
-                  onClick={() => {
-                    dispatch(toggleQuizEnabled(course.id));
-                    dispatch(addNotification({
-                      message: `Quiz ${isQuizOn ? "disabled" : "enabled"} for "${course.title}"`,
-                      type: "info",
-                      read: false,
-                    }));
-                  }}
-                  className="flex items-center gap-1.5 text-sm font-medium transition-colors"
+              {/* Management link */}
+              <div className="flex items-center justify-between pt-4 border-t border-border">
+                <p className="text-xs text-muted-foreground italic">Last update: 2 days ago</p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="gap-2 h-9 px-4 border-accent/50 text-accent hover:bg-accent/10"
+                  onClick={() => navigate(`/trainer/course-manage/${course.id}`)}
                 >
-                  {isQuizOn ? (
-                    <><ToggleRight className="h-5 w-5 text-success" /> <span className="text-success">Enabled</span></>
-                  ) : (
-                    <><ToggleLeft className="h-5 w-5 text-muted-foreground" /> <span className="text-muted-foreground">Disabled</span></>
-                  )}
-                </button>
+                  <Settings className="h-4 w-4" /> View Management Center
+                </Button>
               </div>
             </div>
           );

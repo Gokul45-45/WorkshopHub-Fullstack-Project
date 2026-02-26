@@ -31,6 +31,7 @@ import StudentNotifications from "./pages/student/StudentNotifications";
 import StudentSuggestions from "./pages/student/StudentSuggestions";
 import QuizPage from "./pages/student/QuizPage";
 import LeaderboardPage from "./pages/student/LeaderboardPage";
+import LearningHub from "./pages/student/LearningHub";
 
 // Trainer pages
 import TrainerDashboard from "./pages/trainer/TrainerDashboard";
@@ -38,6 +39,7 @@ import TrainerCourses from "./pages/trainer/TrainerCourses";
 import TrainerStudents from "./pages/trainer/TrainerStudents";
 import TrainerAnalytics from "./pages/trainer/TrainerAnalytics";
 import TrainerForum from "./pages/trainer/TrainerForum";
+import CourseManagementCenter from "./pages/trainer/CourseManagementCenter";
 
 // Admin pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -83,6 +85,7 @@ const App = () => (
               <Route path="certificates" element={<StudentCertificates />} />
               <Route path="notifications" element={<StudentNotifications />} />
               <Route path="suggestions" element={<StudentSuggestions />} />
+              <Route path="learning-hub/:id" element={<LearningHub />} />
               <Route path="quiz/:courseId" element={<QuizPage />} />
             </Route>
 
@@ -93,6 +96,7 @@ const App = () => (
               <Route path="students" element={<TrainerStudents />} />
               <Route path="analytics" element={<TrainerAnalytics />} />
               <Route path="forum" element={<TrainerForum />} />
+              <Route path="course-manage/:id" element={<CourseManagementCenter />} />
             </Route>
 
             {/* Admin routes */}

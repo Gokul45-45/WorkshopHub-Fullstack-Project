@@ -2,8 +2,8 @@ import { Outlet } from "react-router-dom";
 import DashboardSidebar from "@/components/DashboardSidebar";
 import { useAppSelector } from "@/hooks/useRedux";
 import { Bell } from "lucide-react";
-import { markAllRead } from "@/store/slices/notificationsSlice";
 import { useAppDispatch } from "@/hooks/useRedux";
+import NotificationBell from "./layout/NotificationBell";
 
 const DashboardLayout = () => {
   const { userName, role } = useAppSelector((s) => s.auth);
@@ -20,17 +20,7 @@ const DashboardLayout = () => {
             <h1 className="font-display text-lg font-bold text-foreground capitalize">{role} Dashboard</h1>
           </div>
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => dispatch(markAllRead())}
-              className="relative rounded-lg p-2 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-            >
-              <Bell className="h-5 w-5" />
-              {unreadCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-foreground">
-                  {unreadCount}
-                </span>
-              )}
-            </button>
+            <NotificationBell />
           </div>
         </header>
 

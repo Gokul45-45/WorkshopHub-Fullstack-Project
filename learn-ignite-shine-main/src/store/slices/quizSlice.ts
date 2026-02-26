@@ -31,12 +31,30 @@ interface CalendarEvent {
   courseId: string;
 }
 
+interface QuizTemplate {
+  id: string;
+  courseId: string;
+  title: string;
+  questions: { question: string; options: string[]; correct: number }[];
+  timer: number;
+}
+
+interface StudentPerformance {
+  studentId: string;
+  courseId: string;
+  progress: number;
+  lastActive: string;
+  quizScores: number[];
+}
+
 interface QuizState {
   results: QuizResult[];
   leaderboard: LeaderboardEntry[];
   attendance: Record<string, number>; // courseId -> percentage
   calendarEvents: CalendarEvent[];
   quizEnabled: Record<string, boolean>; // courseId -> enabled
+  quizTemplates: QuizTemplate[];
+  studentPerformance: StudentPerformance[];
 }
 
 const initialState: QuizState = {
@@ -61,6 +79,12 @@ const initialState: QuizState = {
     { id: "e6", title: "Cloud Computing Quiz", date: "2026-02-27", type: "quiz", courseId: "c3" },
   ],
   quizEnabled: { c1: true, c6: true, c3: true, c2: false, c4: false, c5: false, c7: false },
+  quizTemplates: [],
+  studentPerformance: [
+    { studentId: "s1", courseId: "c1", progress: 45, lastActive: "2026-02-25", quizScores: [75, 82] },
+    { studentId: "s2", courseId: "c1", progress: 60, lastActive: "2026-02-26", quizScores: [88, 90] },
+    { studentId: "s3", courseId: "c1", progress: 30, lastActive: "2026-02-24", quizScores: [65] },
+  ],
 };
 
 const quizSlice = createSlice({
@@ -87,8 +111,19 @@ const quizSlice = createSlice({
     addCalendarEvent(state, action: PayloadAction<Omit<CalendarEvent, "id">>) {
       state.calendarEvents.push({ ...action.payload, id: `e${Date.now()}` });
     },
+    addQuizTemplate(state, action: PayloadAction<QuizTemplate>) {
+      state.quizTemplates.push(action.payload);
+    },
+    simulateUpdate(state, action: PayloadAction<{ studentId: string; courseId: string }>) {
+      const perf = state.studentPerformance.find(p => p.studentId === action.payload.studentId && p.courseId === action.payload.courseId);
+      if (perf) {
+        perf.progress = Math.min(100, perf.progress + 5);
+        perf.lastActive = new Date().toISOString().split('T')[0];
+        perf.quizScores.push(Math.floor(Math.random() * 20) + 80);
+      }
+    },
   },
 });
 
-export const { submitQuizResult, toggleQuizEnabled, markAttendance, addCalendarEvent } = quizSlice.actions;
+export const { submitQuizResult, toggleQuizEnabled, markAttendance, addCalendarEvent, addQuizTemplate, simulateUpdate } = quizSlice.actions;
 export default quizSlice.reducer;

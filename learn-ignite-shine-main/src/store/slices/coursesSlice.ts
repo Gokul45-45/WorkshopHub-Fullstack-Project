@@ -10,9 +10,26 @@ interface Payment {
   status: "success" | "failed";
 }
 
+export interface Course {
+  id: string;
+  title: string;
+  category: string;
+  trainerId: string;
+  price: number;
+  rating: number;
+  enrolled: number;
+  duration: string;
+  modules: number;
+  description: string;
+  status: "active" | "inactive";
+  learnings: string[];
+  requirements: string[];
+  materials?: { id: string; title: string; type: "video" | "pdf" | "link"; url: string; module: string }[];
+}
+
 interface CoursesState {
-  courses: typeof mockCourses;
-  trainers: typeof mockTrainers;
+  courses: Course[];
+  trainers: any[]; // Trainers will be moved to usersSlice soon
   enrolledCourseIds: string[];
   payments: Payment[];
 }
@@ -40,11 +57,27 @@ const coursesSlice = createSlice({
         state.payments.push({ ...payment, id: `p${Date.now()}` });
       }
     },
-    addCourse(state, action: PayloadAction<typeof mockCourses[0]>) {
+    addCourse(state, action: PayloadAction<Course>) {
       state.courses.push(action.payload);
+    },
+    updateCourse(state, action: PayloadAction<Course>) {
+      const index = state.courses.findIndex((c) => c.id === action.payload.id);
+      if (index !== -1) {
+        state.courses[index] = action.payload;
+      }
+    },
+    deleteCourse(state, action: PayloadAction<string>) {
+      state.courses = state.courses.filter((c) => c.id !== action.payload);
+    },
+    addMaterial(state, action: PayloadAction<{ courseId: string; material: any }>) {
+      const course = state.courses.find(c => c.id === action.payload.courseId);
+      if (course) {
+        if (!course.materials) course.materials = [];
+        course.materials.push({ ...action.payload.material, id: `mat${Date.now()}` });
+      }
     },
   },
 });
 
-export const { enrollCourse, addCourse } = coursesSlice.actions;
+export const { enrollCourse, addCourse, updateCourse, deleteCourse, addMaterial } = coursesSlice.actions;
 export default coursesSlice.reducer;

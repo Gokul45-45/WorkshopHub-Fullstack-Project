@@ -5,6 +5,9 @@ import notificationsReducer from "./slices/notificationsSlice";
 import quizReducer from "./slices/quizSlice";
 import forumReducer from "./slices/forumSlice";
 
+import usersReducer from "./slices/usersSlice";
+import gamificationReducer from "./slices/gamificationSlice";
+
 export const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -12,6 +15,8 @@ export const store = configureStore({
     notifications: notificationsReducer,
     quiz: quizReducer,
     forum: forumReducer,
+    users: usersReducer,
+    gamification: gamificationReducer,
   },
 });
 
